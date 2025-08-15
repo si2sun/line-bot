@@ -15,8 +15,8 @@ from google.cloud import firestore
 
 # --- 組態設定 ---
 app = Flask(__name__, static_url_path='/static')
-config = configparser.ConfigParser()
-config.read('config.ini')
+# config = configparser.ConfigParser()
+# config.read('config.ini')
 
 # LINE Bot 設定
 # LINE_CHANNEL_ACCESS_TOKEN = config.get('line-bot', 'channel_access_token')
@@ -40,7 +40,7 @@ client = genai.configure(api_key=GEMINI_API_KEY)
 # genai.configure(api_key=GEMINI_API_KEY)
 # Firestore 設定
 # 確保你的 GOOGLE_APPLICATION_CREDENTIALS 環境變數已經設定好
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.path.dirname(__file__), 'animetext-anime1si2sun.json')
+# os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.path.dirname(__file__), 'animetext-anime1si2sun.json')
 firestore_client = firestore.Client(project="animetext", database="anime-label")
 doc_ref = firestore_client.collection('gcp-line-bot').document('line-bot-gemini-memory')
 
@@ -177,3 +177,4 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
 
     app.run(port=port, debug=True)
+
