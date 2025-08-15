@@ -29,7 +29,8 @@ EXPOSE 5001
 # Render 會自動設定這個變數，Gunicorn 會讀取它
 
 # CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:$PORT", "line_gemini_firestore:app"]
-CMD ["uvicorn", "line_gemini_firestore:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "line_gemini_firestore:app", "--host", "0.0.0.0", "--port", "5001"]
 # CMD ["python", "line_gemini_firestore.py"]
+
 
 
