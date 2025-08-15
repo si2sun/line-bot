@@ -27,4 +27,6 @@ EXPOSE 5001
 # 7. 執行命令 (Entrypoint Command)
 # 將 5001 硬性設定，改為讀取 $PORT 環境變數
 # Render 會自動設定這個變數，Gunicorn 會讀取它
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:$PORT", "line_gemini_firestore:app"]
+
+# CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:$PORT", "line_gemini_firestore:app"]
+CMD ["python", "line_gemini_firestore.py"]
