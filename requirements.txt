@@ -1,0 +1,15 @@
+# LINE Bot SDK
+line-bot-sdk==3.10.1 
+
+# Google SDKs - Specific versions to ensure compatibility
+google-generativeai==0.8.5
+google-cloud-firestore==2.16.0
+
+# Core Google libraries that often cause conflicts
+google-api-core==2.19.0
+google-auth==2.29.0
+googleapis-common-protos==1.63.0
+proto-plus==1.24.0
+protobuf==4.25.3
+grpcio==1.64.0
+grpcio-status==1.62.2
