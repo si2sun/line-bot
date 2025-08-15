@@ -1,6 +1,7 @@
 # Web Framework and Server
 Flask==3.0.3
 gunicorn==22.0.0
+uvicorn[standard]
 # LINE Bot SDK
 line-bot-sdk==3.10.1 
 
@@ -17,3 +18,4 @@ protobuf==4.25.3
 grpcio==1.64.0
 
 grpcio-status==1.62.2
+
