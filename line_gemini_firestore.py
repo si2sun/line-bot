@@ -68,7 +68,7 @@ def handle_text_message(event: MessageEvent):
     user_id = event.source.user_id
     user_text = event.message.text.strip() # 去除前後空白
 
-    if user_text.lower() in ('結束gemini', '結束 gemini'):
+    if user_text.lower() in ('結束gemini', '結束 gemini','結束Gemini', '結束Gemini '):
         gemini_mode = False
         reply_message(event.reply_token, '結束Gemini AI服務')
     elif user_text.lower() == 'gemini':
@@ -177,4 +177,5 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
 
     app.run(port=port, debug=True)
+
 
