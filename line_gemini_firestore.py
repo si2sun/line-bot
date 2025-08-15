@@ -19,23 +19,24 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # LINE Bot 設定
-LINE_CHANNEL_ACCESS_TOKEN = config.get('line-bot', 'channel_access_token')
-LINE_CHANNEL_SECRET = config.get('line-bot', 'channel_secret')
-configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(LINE_CHANNEL_SECRET)
-# LINE Bot 設定 (從環境變數讀取)
-# LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
-# LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
+# LINE_CHANNEL_ACCESS_TOKEN = config.get('line-bot', 'channel_access_token')
+# LINE_CHANNEL_SECRET = config.get('line-bot', 'channel_secret')
 # configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
 # handler = WebhookHandler(LINE_CHANNEL_SECRET)
+# LINE Bot 設定 (從環境變數讀取)
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
+LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
+configuration = Configuration(access_token=LINE_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
 messaging_api_client = ApiClient(configuration)
 line_bot_api = MessagingApi(messaging_api_client)
 
 # Gemini API 設定
 # Gemini API 設定
-GEMINI_API_KEY = config.get('line-bot', 'gemini_api')
+# GEMINI_API_KEY = config.get('line-bot', 'gemini_api')
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
 client = genai.configure(api_key=GEMINI_API_KEY)
-# GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+
 # genai.configure(api_key=GEMINI_API_KEY)
 # Firestore 設定
 # 確保你的 GOOGLE_APPLICATION_CREDENTIALS 環境變數已經設定好
@@ -174,4 +175,5 @@ if __name__ == "__main__":
     # Render 會提供一個 PORT 環境變數，我們的 Gunicorn 會用它
     # 本地測試時，可以保留 app.run，但在 Docker 中它不會被執行
     port = int(os.environ.get("PORT", 5001))
+
     app.run(port=port, debug=True)
