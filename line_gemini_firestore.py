@@ -1,7 +1,7 @@
 from flask import Flask, request, abort
 import configparser
 # import google.genai as genai
-
+import pytz
 import google.generativeai as genai
 from google.generativeai.types import GenerationConfig
 from linebot.v3 import WebhookHandler
@@ -101,21 +101,19 @@ def gemini_with_memory(user_text: str) -> str:
     model = genai.GenerativeModel('gemini-2.5-flash')
 
     # ✅ 2. 讀取並格式化 Firestore 的對話歷史
+    # 讀取並格式化 Firestore 的對話歷史
     try:
         doc = doc_ref.get()
         memory_from_db = doc.to_dict().get('memory', []) if doc.exists else []
 
-        # 將 Firestore 儲存的格式轉換為 Gemini API 需要的格式
-        # Firestore: [{'name': 'user', 'text': '[time]...'}, ...]
-        # Gemini API: [{'role': 'user', 'parts': ['...']}, ...]
         chat_history = []
         for message in memory_from_db:
             role = 'user' if message.get('name') == 'user' else 'model'
-            # 移除我們自己記錄的時間戳，只傳送純文字內容給模型
             text_content = message.get('text', '')
             try:
-                clean_text = text_content[text_content.index('] ') + 2:]
-            except ValueError:
+                # 移除我們自己記錄的時間戳 [YYYY-MM-DD HH:MM:SS] 
+                clean_text = text_content.split('] ', 1)[1]
+            except IndexError:
                 clean_text = text_content
             
             chat_history.append({'role': role, 'parts': [clean_text]})
@@ -125,10 +123,10 @@ def gemini_with_memory(user_text: str) -> str:
         chat_history = []
         memory_from_db = []
 
-    # ✅ 3. 帶著歷史紀錄啟動一個對話 Session
+    # 帶著歷史紀錄啟動一個對話 Session
     chat = model.start_chat(history=chat_history)
 
-    # ✅ 4. 傳送新訊息並取得模型回覆
+    # 傳送新訊息並取得模型回覆
     try:
         response = chat.send_message(user_text)
         model_response_text = response.text
@@ -136,15 +134,27 @@ def gemini_with_memory(user_text: str) -> str:
         app.logger.error(f"呼叫 Gemini API 時發生錯誤: {e}")
         model_response_text = "抱歉，我暫時無法回應你的訊息。"
 
-    # ✅ 5. 將新的對話回合儲存回 Firestore
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    memory_from_db.append({'name': 'user', 'text': f"[{current_time}] {user_text}"})
-    memory_from_db.append({'name': 'model', 'text': f"[{current_time}] {model_response_text}"})
+    # --- 時間修正：將 UTC 時間轉換為台北時區 ---
+    # 1. 獲取當前的 UTC 時間
+    utc_now = datetime.datetime.now(pytz.utc)
+    # 2. 定義目標時區 (台北)
+    taipei_tz = pytz.timezone('Asia/Taipei')
+    # 3. 將 UTC 時間轉換為台北時間
+    taipei_now = utc_now.astimezone(taipei_tz)
+    # 4. 格式化為字串
+    current_time_str = taipei_now.strftime("%Y-%m-%d %H:%M:%S")
+    # ---------------------------------------------
 
+    # 將新的對話回合儲存回記憶體中的列表
+    memory_from_db.append({'name': 'user', 'text': f"[{current_time_str}] {user_text}"})
+    memory_from_db.append({'name': 'model', 'text': f"[{current_time_str}] {model_response_text}"})
+
+    # 將更新後的完整對話列表寫回 Firestore
     try:
         doc_ref.set({'memory': memory_from_db})
     except Exception as e:
         app.logger.error(f"寫入 Firestore 失敗: {e}")
+        
     return model_response_text
 
 # --- LINE Messaging API 輔助函式 ---
@@ -177,5 +187,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
 
     app.run(port=port, debug=True)
+
 
 
